@@ -2,7 +2,5 @@
   "name": "Liquid Fast Download",
   "description": "Motor avanzado de rastreo, extracción y descarga para Manga (PDF), Video (MP4, MKV, WebM, MP3) e Imágenes (ZIP, CBZ, WebP, JPG, PNG).",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

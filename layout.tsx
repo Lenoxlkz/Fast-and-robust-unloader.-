@@ -4,16 +4,16 @@ import { I18nProvider } from '@/components/I18nProvider';
 
 export const metadata: Metadata = {
   title: 'Liquid Fast Download',
-  description: 'Anti-detect web crawler & scraper avoiding CloudFlare and CORS.',
+  description: 'Motor avanzado de rastreo, extracción y descarga para Manga, Video e Imágenes.',
   openGraph: {
     title: 'Liquid Fast Download',
-    description: 'Anti-detect web crawler & scraper avoiding CloudFlare and CORS.',
+    description: 'Motor avanzado de rastreo, extracción y descarga para Manga, Video e Imágenes.',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Liquid Fast Download',
-    description: 'Anti-detect web crawler & scraper avoiding CloudFlare and CORS.',
+    description: 'Motor avanzado de rastreo, extracción y descarga para Manga, Video e Imágenes.',
   },
 };
 
@@ -28,3 +28,4 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
     </html>
   );
 }
+

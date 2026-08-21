@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useSyncExternalStore } from 'react';
 
 type Language = 'en' | 'es';
 
@@ -318,13 +318,16 @@ function detectBrowserLanguage(): Language {
 const emptySubscribe = () => () => {};
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [isClient, setIsClient] = useState(false);
+  const isClient = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   const [language, setLanguage] = useState<Language>(() => detectBrowserLanguage());
 
   // Listen for real-time system/browser language changes
   useEffect(() => {
-    setIsClient(true);
     const handleLanguageChange = () => {
       const detected = detectBrowserLanguage();
       setLanguage(detected);
