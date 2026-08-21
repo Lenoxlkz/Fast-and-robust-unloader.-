@@ -1,6 +1,6 @@
 import { PDFDocument } from 'pdf-lib';
 import jsPDF from 'jspdf';
-import { Tracker } from '@/types';
+import { Tracker } from '@/lib/types';
 
 // Convert image url to ArrayBuffer (through local proxy if needed)
 async function fetchImageBuffer(url: string): Promise<{ buffer: ArrayBuffer; format: string }> {

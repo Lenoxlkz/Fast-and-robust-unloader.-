@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { toSafeExternalUrl } from '@/lib/security/urlGuard';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+// Vercel: el scraping de series largas supera el default de 15s.
+export const maxDuration = 60;
 
 const BROWSER_HEADERS = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
@@ -30,21 +34,22 @@ export interface ChapterItem {
 
 export async function POST(req: NextRequest) {
   try {
-    let body: { url?: string } = {};
+    let body: { url?: unknown } = {};
     try {
       body = await req.json();
     } catch {
       return NextResponse.json({ error: 'Valid JSON body is required' }, { status: 400 });
     }
-    let targetUrl = (body.url || '').trim();
 
-    if (!targetUrl) {
-      return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+    // Valida y normaliza la URL antes de hacerle fetch desde el servidor:
+    // bloquea protocolos raros, credenciales embebidas, loopback, redes
+    // privadas y endpoints de metadata (SSRF).
+    const safeUrl = toSafeExternalUrl(body.url);
+    if (!safeUrl.ok || !safeUrl.url) {
+      return NextResponse.json({ error: safeUrl.reason ?? 'Invalid URL' }, { status: 400 });
     }
 
-    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
-      targetUrl = `https://${targetUrl}`;
-    }
+    const targetUrl = safeUrl.url;
 
     let seriesTitle = '';
     const chapters: ChapterItem[] = [];

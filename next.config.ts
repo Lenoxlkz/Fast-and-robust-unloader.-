@@ -21,7 +21,8 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  output: 'standalone',
+  // Nota: `output: 'standalone'` se eliminó a propósito. Sirve para self-hosting
+  // en Docker; en Vercel no aporta nada y solo alarga el build.
   transpilePackages: ['motion'],
   webpack: (config, {dev}) => {
     // HMR is disabled in AI Studio via DISABLE_HMR env var.

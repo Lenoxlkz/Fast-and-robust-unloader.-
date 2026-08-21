@@ -36,15 +36,15 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Tracker, TrackingMode, ChapterInfo, SearchCategory } from '@/types';
+import { Tracker, TrackingMode, ChapterInfo, SearchCategory } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { v4 as uuidv4 } from 'uuid';
 import Image from 'next/image';
 import { useI18n } from '@/components/I18nProvider';
 import { TerminalTitle } from '@/components/TerminalTitle';
-import { exportWithPdfLib, exportWithImg2Pdf } from '@/lib/pdfExporter';
-import { exportImagesPackage } from '@/lib/imageExporter';
-import { exportVideo, exportAudioMp3 } from '@/lib/videoExporter';
+import { exportWithPdfLib, exportWithImg2Pdf } from '@/lib/exporters/pdfExporter';
+import { exportImagesPackage } from '@/lib/exporters/imageExporter';
+import { exportVideo, exportAudioMp3 } from '@/lib/exporters/videoExporter';
 
 interface TaskControl {
   isPaused: boolean;
