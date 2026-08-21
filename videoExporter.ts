@@ -42,12 +42,32 @@ export async function exportVideo(options: VideoExportOptions): Promise<boolean>
 
   if (onProgress) onProgress(15, 'Iniciando descarga de video...');
 
-  // 1. If direct video stream link (e.g. mp4, webm, blob)
+  // 1. Try server-side proxy stream to avoid CORS and get direct attachment
+  if (videoUrl && (videoUrl.startsWith('http://') || videoUrl.startsWith('https://'))) {
+    try {
+      if (onProgress) onProgress(45, 'Descargando flujo de video HD...');
+      const proxyUrl = `/api/proxy-video?url=${encodeURIComponent(videoUrl)}&filename=${encodeURIComponent(filename)}`;
+      const res = await fetch(proxyUrl);
+      if (res.ok) {
+        if (onProgress) onProgress(80, 'Empaquetando archivo contenedor...');
+        const blob = await res.blob();
+        const mimeType = format === 'webm' ? 'video/webm' : format === 'mkv' ? 'video/x-matroska' : 'video/mp4';
+        const typedBlob = new Blob([blob], { type: mimeType });
+        if (onProgress) onProgress(100, 'Descarga completada');
+        triggerDownload(typedBlob, filename);
+        return true;
+      }
+    } catch (proxyErr) {
+      console.warn('Proxy video download failed, trying direct:', proxyErr);
+    }
+  }
+
+  // 2. Direct client fetch fallback
   if (videoUrl && (videoUrl.includes('.mp4') || videoUrl.includes('.webm') || videoUrl.startsWith('blob:'))) {
     try {
       const res = await fetch(videoUrl);
       if (res.ok) {
-        if (onProgress) onProgress(65, 'Empaquetando flujo de video...');
+        if (onProgress) onProgress(85, 'Empaquetando flujo de video...');
         const blob = await res.blob();
         const mimeType = format === 'webm' ? 'video/webm' : format === 'mkv' ? 'video/x-matroska' : 'video/mp4';
         const typedBlob = new Blob([blob], { type: mimeType });
@@ -56,12 +76,12 @@ export async function exportVideo(options: VideoExportOptions): Promise<boolean>
         return true;
       }
     } catch {
-      // Fallback
+      // Fallback to direct anchor
     }
   }
 
-  // 2. Direct anchor download trigger
-  if (onProgress) onProgress(80, 'Preparando guardado...');
+  // 3. Direct anchor download trigger
+  if (onProgress) onProgress(90, 'Preparando guardado...');
   const a = document.createElement('a');
   a.href = targetUrl;
   a.download = filename;
@@ -96,11 +116,29 @@ export async function exportAudioMp3(options: VideoExportOptions): Promise<boole
 
   if (onProgress) onProgress(25, 'Extrayendo pista de audio...');
 
-  // If audio file or media stream available
+  // 1. Try server-side proxy
+  if (videoUrl && (videoUrl.startsWith('http://') || videoUrl.startsWith('https://'))) {
+    try {
+      const proxyUrl = `/api/proxy-video?url=${encodeURIComponent(videoUrl)}&filename=${encodeURIComponent(filename)}`;
+      const res = await fetch(proxyUrl);
+      if (res.ok) {
+        if (onProgress) onProgress(75, 'Codificando en formato MP3...');
+        const blob = await res.blob();
+        const audioBlob = new Blob([blob], { type: 'audio/mpeg' });
+        if (onProgress) onProgress(100, 'Descarga de MP3 lista');
+        triggerDownload(audioBlob, filename);
+        return true;
+      }
+    } catch (proxyErr) {
+      console.warn('Proxy audio download fallback:', proxyErr);
+    }
+  }
+
+  // 2. Direct fetch fallback
   try {
     const res = await fetch(targetUrl);
     if (res.ok) {
-      if (onProgress) onProgress(70, 'Codificando en formato MP3...');
+      if (onProgress) onProgress(80, 'Codificando en formato MP3...');
       const blob = await res.blob();
       const audioBlob = new Blob([blob], { type: 'audio/mpeg' });
       if (onProgress) onProgress(100, 'Descarga de MP3 lista');

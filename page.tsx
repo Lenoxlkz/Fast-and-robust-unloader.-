@@ -604,6 +604,10 @@ export default function Dashboard() {
     // 2. Sequential & Continuous: First discover all chapters
     let chapters: ChapterInfo[] = [];
     let seriesTitle = '';
+    let discoveredCategory: SearchCategory | undefined;
+    let discoveredMediaType: 'image' | 'video' | undefined;
+    let discoveredVideoUrl: string | undefined;
+    let discoveredAuthor: string | undefined;
 
     try {
       const chapterRes = await fetch('/api/chapters', {
@@ -616,6 +620,10 @@ export default function Dashboard() {
         const chData = await chapterRes.json();
         chapters = chData.chapters || [];
         seriesTitle = chData.seriesTitle || '';
+        discoveredCategory = chData.category;
+        discoveredMediaType = chData.mediaType;
+        discoveredVideoUrl = chData.videoUrl;
+        discoveredAuthor = chData.author;
       }
     } catch (chErr) {
       console.warn('Chapters discovery failed, will fallback to single URL:', chErr);
@@ -629,9 +637,12 @@ export default function Dashboard() {
       id: c.id || (idx + 1),
       name: c.name || `${t('chapter')} ${idx + 1}`,
       url: c.url,
-      status: 'pending',
-      images: [],
-      imageCount: 0
+      status: (c.images && c.images.length > 0) || c.videoUrl ? 'completed' : 'pending',
+      images: c.images || [],
+      imageCount: c.images?.length || 0,
+      mediaType: c.mediaType || discoveredMediaType,
+      videoUrl: c.videoUrl || discoveredVideoUrl,
+      author: c.author || discoveredAuthor
     }));
 
     const currentChaptersState: ChapterInfo[] = [...initialChapters];
@@ -641,6 +652,10 @@ export default function Dashboard() {
         return {
           ...item,
           title: seriesTitle || item.title,
+          category: discoveredCategory || item.category,
+          mediaType: discoveredMediaType || item.mediaType,
+          videoUrl: discoveredVideoUrl || item.videoUrl,
+          author: discoveredAuthor || item.author,
           totalChapters: chapters.length,
           completedChapters: 0,
           progress: 8,
